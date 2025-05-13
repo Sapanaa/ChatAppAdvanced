@@ -1,28 +1,30 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // For navigation
+import { loginUser } from '../api/auth'; // Import loginUser function
 
 const Login = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate(); // For redirecting after successful login
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const response = await fetch('http://localhost:5000/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      // Use the loginUser function from auth.js
+      const data = await loginUser(email, password);
 
-    const data = await response.json();
-
-    if (response.ok) {
-      localStorage.setItem('token', data.token); // Save the token
+      // If login is successful, store the token and call onLogin
+      localStorage.setItem('token', data.token); // Store the JWT token in localStorage
+      onLogin(data.token); // Pass token to parent component
       console.log('Login successful:', data);
-    } else {
-      setError(data.error); // Show error message
+
+      // Redirect to the dashboard or other protected page after successful login
+      navigate('/dashboard'); // Change '/dashboard' to your desired page
+    } catch (error) {
+      setError(error.message); // Set error message
+      console.error('Login error:', error);
     }
   };
 
@@ -42,7 +44,7 @@ const Login = ({ onLogin }) => {
         onChange={(e) => setPassword(e.target.value)}
         required
       />
-      {error && <p>{error}</p>}
+      {error && <p>{error}</p>} {/* Show error if exists */}
       <button type="submit">Login</button>
     </form>
   );

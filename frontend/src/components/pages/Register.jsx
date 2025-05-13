@@ -1,29 +1,29 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // For navigation
+import { registerUser } from '../api/auth'; // Import registerUser function
 
 const Register = ({ onRegister }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate(); // For redirecting after successful registration
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const response = await fetch('http://localhost:5000/api/auth/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ username, email, password }),
-    });
+    try {
+      // Use the registerUser function from auth.js
+      const data = await registerUser(username, email, password);
 
-    const data = await response.json();
-
-    if (response.ok) {
-      //onRegister(data.token); // Call parent component on successful registration
+      // If registration is successful, pass the response to the parent component
       console.log('Registration successful:', data);
-    } else {
-      setError(data.error); // Show error message
+
+      // Redirect to login page after successful registration
+      navigate('/login'); // Redirect to the login page after successful registration
+    } catch (error) {
+      setError(error.message); // Set error message
+      console.error('Registration error:', error);
     }
   };
 
@@ -50,7 +50,7 @@ const Register = ({ onRegister }) => {
         onChange={(e) => setPassword(e.target.value)}
         required
       />
-      {error && <p>{error}</p>}
+      {error && <p>{error}</p>} {/* Show error if exists */}
       <button type="submit">Register</button>
     </form>
   );

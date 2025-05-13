@@ -1,23 +1,21 @@
-// middleware/authMiddleware.js
 import jwt from 'jsonwebtoken';
 
+const JWT_SECRET = process.env.JWT_SECRET;
+
 export const authenticate = (req, res, next) => {
-  console.log('Checking authentication...');
-  const token = req.headers['authorization']?.split(' ')[1];
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
   if (!token) {
-    console.log('No token found');
-    return res.status(401).json({ message: 'Unauthorized' });
+    return res.status(401).json({ error: 'Access denied. No token provided.' });
   }
 
-  jwt.verify(token, 'your_secret_key', (err, decoded) => {
-    if (err) {
-      console.log('Invalid token', err);
-      return res.status(403).json({ message: 'Forbidden' });
-    }
-
-    req.user = decoded;  // Attach decoded user info to request object
-    console.log('User authenticated:', decoded);
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded; // Adds { userId } to the request
     next();
-  });
+  } catch (err) {
+    console.error('Auth middleware error:', err);
+    res.status(403).json({ error: 'Invalid token' });
+  }
 };
