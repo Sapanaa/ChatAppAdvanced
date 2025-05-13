@@ -4,8 +4,8 @@ import { createConversation, getUserConversations, addUserToConversation, getCon
 const router = express.Router();
 
 router.post('/create', createConversation);
-router.get('/:userId', getUserConversations);
-router.post('/addUser', addUserToConversation);
-router.get('/:conversationId/members',getConversationMembers );
+router.get('/:userId',  getUserConversations);
+router.post('/addUser',  addUserToConversation);
+router.get('/:conversationId/members', getConversationMembers );
 
 export default router;
